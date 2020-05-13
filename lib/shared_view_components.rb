@@ -1,4 +1,5 @@
 require "shared_view_components/version"
+require "shared_view_components/components/data_table/generator"
 
 module SharedViewComponents
   class Error < StandardError; end

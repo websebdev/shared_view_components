@@ -1,0 +1,64 @@
+<div class="ibox-content">
+  <%= form_tag Rails.application.routes.url_helpers.public_send("#{@records.klass.name.downcase.pluralize}_path"), method: :get do %>
+    <div class='row'>
+      <% @columns.find_all {|c| c[:filterable]}.each do |column| %>
+        <% title = column[:title] || column[:name].to_s.titleize(keep_id_suffix: true) %>
+        <% value = params[column[:name]] %>
+        <div class="form-group col-md-2">
+          <%= label_tag column[:name], title %>
+          <% if column[:type] == "boolean" %>
+            <%= select_tag column[:name], options_for_select(["", "Yes", "No"], value) , class: 'form-control' %>
+          <% elsif column[:choices] %>
+            <%= select_tag column[:name], options_for_select(column[:choices].prepend(["", ""]), value), class: "form-control" %>
+          <% elsif column[:type] == "time" %>
+            <div class='input-group date hourpicker'>
+              <%= text_field_tag column[:name], value, class: 'form-control' %>
+              <span class="input-group-addon">
+                <span class="fa fa-hourglass"></span>
+              </span>
+            </div>
+          <% elsif column[:type] == "number" %>
+            <%= number_field_tag column[:name], value, class: "form-control" %>
+          <% else %>
+            <%= text_field_tag column[:name], value, class: 'form-control' %>
+          <% end %>
+        </div>
+      <% end %>
+      <div class="form-group col-auto-shrink">
+        <%= label_tag :hidden, 'Hidden', :style => "visibility: hidden;" %><br>
+        <%= button_tag 'Search', type: "submit", class: "btn btn-primary" %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="ibox-content">
+  <div class='customer-list'>
+    <table class="table table-striped data-table-clickable">
+      <thead>
+        <tr>
+          <% @columns.find_all {|c| c[:index] }.each do |column| %>
+            <th><%= column_header(column) %></th>
+          <% end %>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% @records.each do |record| %>
+          <tr class="table-row-hover">
+            <% @columns.find_all {|c| c[:index] }.each do |column| %>
+              <td><%= record.public_send(column[:name]) %></td>
+            <% end %>
+            
+            <td>
+              <%= link_to '', record, title: 'Show', class: 'btn btn-primary fa fa-eye' %>
+              <%= link_to '', Rails.application.routes.url_helpers.public_send("edit_#{@records.klass.name.downcase}_path", record), title: 'Edit', class: 'btn btn-info fa fa-edit' %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <%= paginate @records %>
+  </div>
+</div>
